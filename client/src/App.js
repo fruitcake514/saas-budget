@@ -1,8 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
-import AdminDashboard from './components/AdminDashboard';
-import jwt_decode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
+
+ChartJS.register(ArcElement, Tooltip, Legend);
 
 function App() {
   const [token, setToken] = useState(null);
@@ -11,27 +18,32 @@ function App() {
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
-      setToken(storedToken);
-      const decodedUser = jwt_decode(storedToken);
-      setUser(decodedUser.user);
+      try {
+        const decodedUser = jwtDecode(storedToken);
+        // Check if token is expired
+        if (decodedUser.exp * 1000 < Date.now()) {
+          localStorage.removeItem('token');
+          return;
+        }
+        setToken(storedToken);
+        setUser(decodedUser.user);
+      } catch (error) {
+        localStorage.removeItem('token');
+      }
     }
   }, []);
 
   const handleSetToken = (token) => {
     localStorage.setItem('token', token);
     setToken(token);
-    const decodedUser = jwt_decode(token);
+    const decodedUser = jwtDecode(token);
     setUser(decodedUser.user);
   };
 
   return (
     <div className="App">
       {token ? (
-        user && user.is_admin ? (
-          <AdminDashboard token={token} />
-        ) : (
-          <Dashboard token={token} />
-        )
+        <Dashboard token={token} user={user} />
       ) : (
         <Login setToken={handleSetToken} />
       )}
