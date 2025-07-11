@@ -1,6 +1,7 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "SaaS Budget",
+  "name": "SaaS Budget - 50-30-20 Smart Budgeting",
+  "description": "A modern Progressive Web App for budget management using the proven 50-30-20 budgeting rule",
   "icons": [
     {
       "src": "favicon.ico",
@@ -10,16 +11,22 @@
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#00b4d8",
+  "background_color": "#0a0e27",
+  "categories": ["finance", "productivity", "utilities"],
+  "scope": "/",
+  "lang": "en-US"
 }
