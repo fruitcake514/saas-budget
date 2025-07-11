@@ -1,91 +1,556 @@
-# SaaS Budget Application
+# SaaS Budget - 50-30-20 Smart Budgeting PWA
 
-This is a full-stack application for managing budgets, built with a React frontend, Node.js/Express backend, and PostgreSQL database, all containerized with Docker.
+A modern, sleek Progressive Web App (PWA) for budget management using the proven 50-30-20 budgeting rule. Built with React, Node.js, PostgreSQL, and Docker.
 
-## Getting Started
+![SaaS Budget](https://img.shields.io/badge/SaaS-Budget-blue?style=for-the-badge)
+![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=flat-square&logo=docker)
+![PWA](https://img.shields.io/badge/PWA-Enabled-green?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+## ✨ Features
+
+### 🎯 **Core Budgeting**
+- **50-30-20 Rule Implementation**: Automatic categorization (50% Needs, 30% Wants, 20% Savings)
+- **User-Defined Budget Items**: Create and allocate funds to specific items within categories (e.g., Rent, Groceries)
+- **Zero-Sum Budget**: Real-time balance tracking (Income - Expenses)
+- **Multiple Budgets**: Create and manage multiple budget scenarios
+- **Budget Sharing**: Collaborate with others on shared budgets
+
+### 💰 **Financial Management**
+- **Income Tracking**: Add monthly/regular income entries
+- **Expense Tracking**: Categorized expense entry with descriptions, linked to budget items
+- **CSV Import for Expenses**: Bulk import expenses from CSV files with specified columns
+- **Transaction History**: Complete history of all financial entries
+- **Transaction Editing/Deletion**: Full CRUD operations for income and expenses
+- **Budget Health**: Real-time indicators showing budget status
+
+### 📊 **Data Visualization & Reporting**
+- **Interactive Charts**: Doughnut charts for budget breakdown
+- **Progress Indicators**: Visual progress bars for each category and individual budget item
+- **Dashboard Analytics**: Comprehensive financial overview
+- **Detailed Expense Reports**: Generate 30-day reports with individual expense items
+- **CSV Export for Reports**: Export detailed expense reports to CSV
+- **Responsive Design**: Works on desktop, tablet, and mobile
+
+### 🔐 **User Management**
+- **JWT Authentication**: Secure token-based authentication
+- **User Roles**: Admin and regular user permissions
+- **Multi-User Support**: Multiple users with private budgets
+- **Admin Panel**: User creation and management
+
+### 🎨 **Modern UI/UX**
+- **Dark Theme**: Sleek, modern dark interface
+- **PWA Support**: Installable app with offline capabilities
+- **Material Design**: Beautiful, intuitive user interface
+- **Responsive Layout**: Optimized for all screen sizes
+
+## 🚀 Quick Start
 
 ### Prerequisites
+- Docker & Docker Compose
+- Git
 
-- Docker Desktop (or Docker Engine and Docker Compose) installed on your system.
+### 1. Deploy with Docker Compose
+
+To get the application up and running quickly, you can use Docker Compose to build and run all services directly from the GitHub repository. **You do not need to clone the repository first.**
+
+```bash
+# Navigate to the directory where you want to store the docker-compose.yml file
+# (e.g., your home directory or a dedicated projects folder)
+cd /path/to/your/desired/directory
+
+# Download the docker-compose.yml file
+curl -O https://raw.githubusercontent.com/your-username/saas-budget/main/docker-compose.yml
+
+# Create a .env file from the example (important for configuration)
+curl -O https://raw.githubusercontent.com/your-username/saas-budget/main/.env.example
+mv .env.example .env
+# IMPORTANT: Edit the .env file to set your desired passwords and JWT_SECRET
+# nano .env or open with your preferred text editor
+
+# Start the application services
+docker compose up --build -d
+
+# Access the application
+# The client will be available on the port defined by CLIENT_PORT in your .env (default: 80)
+open http://localhost
+```
+
+**Note:** Replace `https://raw.githubusercontent.com/your-username/saas-budget/main/docker-compose.yml` and `https://raw.githubusercontent.com/your-username/saas-budget/main/.env.example` with the actual raw file URLs from your GitHub repository. Also, ensure your repository is public or Docker has the necessary credentials to access it.
+
+### 2. Login
+- **Default Admin Username**: `admin`
+- **Default Admin Password**: `password` (Change this in your `.env` file for production!)
+
+## 📋 Detailed Setup
+
+### Environment Configuration
+The application uses environment variables for configuration. These are typically defined in a `.env` file in the same directory as `docker-compose.yml`. A `.env.example` is provided.
+
+```env
+# Database Configuration
+DB_USER=postgres
+DB_HOST=db
+DB_DATABASE=budget_app
+DB_PASSWORD=password123
+DB_PORT=5432
+
+# JWT Configuration
+JWT_SECRET=your_super_secret_jwt_key_change_in_production
+
+# Admin User (Default credentials for initial setup)
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=password
+
+# Port Configuration
+SERVER_PORT=5000
+CLIENT_PORT=80
+```
+
+### Docker Deployment
+
+#### Building and Running from GitHub (Recommended)
+To build and run the application directly from your GitHub repository, ensure your `docker-compose.yml` has the `context` set to your GitHub repository URL (as updated in the previous step).
+
+```bash
+# Navigate to the directory containing your docker-compose.yml and .env files
+cd /path/to/your/project
+
+# Build and start all services (this will pull from GitHub)
+docker compose up --build -d
+
+# View logs
+docker compose logs -f
+
+# Stop services
+docker compose down
+```
+
+#### Local Development (if you have the repository cloned)
+If you have the repository cloned locally and want to build from local files, you can revert the `context` in `docker-compose.yml` to `./server` and `./client` respectively.
+
+```bash
+# Clone repository (if not already cloned)
+git clone <your-repo-url>
+cd saas-budget
+
+# Build and start all services from local files
+docker compose up --build -d
+
+# View logs
+docker compose logs -f
+
+# Stop services
+docker compose down
+```
+
+#### Production Deployment
+```bash
+# Ensure your docker-compose.yml is configured to pull from GitHub or your local clone is up-to-date
+# Update environment variables for production in your .env file
+# Edit .env with your production values (especially JWT_SECRET, ADMIN_PASSWORD, and DB credentials)
+
+# Deploy with Docker Compose
+docker compose up -d --build
+
+# Check status
+docker compose ps
+```
+
+## 🏗️ Architecture
+
+### Services
+- **Frontend**: React PWA with Material-UI (Port 80)
+- **Backend**: Node.js/Express REST API (Port 5000)
+- **Database**: PostgreSQL with persistent volumes
+- **Reverse Proxy**: Nginx for serving React build
+
+### Tech Stack
+```
+Frontend:
+├── React 18
+├── Material-UI (MUI)
+├── Chart.js
+├── Axios
+├── JWT Decode
+└── PWA Support
+
+Backend:
+├── Node.js
+├── Express.js
+├── PostgreSQL
+├── JWT Authentication
+├── bcrypt
+└── CORS
+
+Infrastructure:
+├── Docker & Docker Compose
+├── Nginx
+├── PostgreSQL
+└── Multi-stage builds
+```
+
+## 📱 PWA Features
 
 ### Installation
+1. Visit the app in a modern browser
+2. Look for "Install App" prompt or browser menu
+3. Click "Install" to add to home screen
+4. App runs like a native application
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <your-repository-url>
-    cd saas-budget
-    ```
+### PWA Capabilities
+- **Offline Support**: Core functionality works without internet
+- **App Icon**: Custom app icon on home screen
+- **Full Screen**: Runs in full-screen mode like native apps
+- **Fast Loading**: Service worker caching for instant startup
+- **Background Sync**: Sync data when connection returns
 
-2.  **Create a `.env` file:**
-    Copy the `.env.example` (if available, otherwise create it manually) from the `server` directory to the root of the `saas-budget` directory and populate it with your environment variables. A basic `.env` file might look like this:
+## 🔧 API Documentation
 
-    ```
-    DB_USER=your_db_user
-    DB_HOST=db
-    DB_DATABASE=your_db_name
-    DB_PASSWORD=your_db_password
-    DB_PORT=5432
-    JWT_SECRET=your_jwt_secret
-    SERVER_PORT=5000
-    CLIENT_PORT=80
-    ADMIN_USERNAME=admin
-    ADMIN_PASSWORD=password
-    ```
-    *   `SERVER_PORT`: The external port for the backend API (default: 5000).
-    *   `CLIENT_PORT`: The external port for the frontend application (default: 80).
-
-### Running the Application
-
-To start the application, navigate to the root of the `saas-budget` directory (where `docker-compose.yml` is located) and run:
-
+### Authentication
 ```bash
-docker-compose up --build
+# Login
+POST /api/users/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "password"
+}
+
+# Response
+{
+  "token": "jwt_token_here"
+}
 ```
 
-This command will:
-*   Build the Docker images for the client and server.
-*   Start the PostgreSQL database container.
-*   Start the backend server container, accessible on `http://localhost:5000` (or your specified `SERVER_PORT`).
-*   Start the frontend client container, accessible on `http://localhost` (or your specified `CLIENT_PORT`).
-
-### Volume Mappings
-
-The `docker-compose.yml` is configured with volume mappings to persist data and allow for live code changes during development:
-
-*   **Database Data:**
-    -   `pgdata:/var/lib/postgresql/data`
-    This volume persists your PostgreSQL database data, so it's not lost when containers are stopped or removed.
-
-*   **Server Code:**
-    -   `./server:/usr/src/app`
-    This maps your local `server` directory to the `/usr/src/app` directory inside the server container. Any changes you make to your local server code will be reflected instantly in the running container (you might need to restart the server process inside the container for changes to take effect, depending on your server's setup).
-
-*   **Client Code:**
-    -   `./client:/usr/src/app`
-    This maps your local `client` directory to the `/usr/src/app` directory inside the client container. This is useful for development, allowing you to see changes to your frontend code without rebuilding the Docker image.
-
-### Port Mappings
-
-*   **Server:**
-    -   `${SERVER_PORT:-5000}:5000`
-    This maps port `5000` inside the server container to port `5000` on your host machine by default. You can change the host port by setting the `SERVER_PORT` environment variable in your `.env` file (e.g., `SERVER_PORT=6000` would map `6000:5000`).
-
-*   **Client:**
-    -   `${CLIENT_PORT:-80}:80`
-    This maps port `80` inside the client container to port `80` on your host machine by default. You can change the host port by setting the `CLIENT_PORT` environment variable in your `.env` file (e.g., `CLIENT_PORT=3000` would map `3000:80`).
-
-## Stopping the Application
-
-To stop the application and remove the containers, run:
-
+### Budget Management
 ```bash
-docker-compose down
+# Get all budgets
+GET /api/budgets
+Headers: { "x-auth-token": "jwt_token" }
+
+# Create budget
+POST /api/budgets
+Headers: { "x-auth-token": "jwt_token" }
+Content-Type: application/json
+
+{
+  "budget_name": "Monthly Budget"
+}
 ```
 
-To stop the application and remove containers, volumes, and networks, run:
-
+### Income & Expenses
 ```bash
-docker-compose down -v
+# Add income
+POST /api/income
+Headers: { "x-auth-token": "jwt_token" }
+Content-Type: application/json
+
+{
+  "budget_id": 1,
+  "amount": 5000,
+  "income_date": "2025-01-01"
+}
+
+# Add expense
+POST /api/expenses
+Headers: { "x-auth-token": "jwt_token" }
+Content-Type: application/json
+
+{
+  "budget_id": 1,
+  "category_id": 1,
+  "amount": 1200,
+  "description": "Rent",
+  "expense_date": "2025-01-01",
+  "budget_item_id": 101 # Optional: Link to a specific budget item
+}
 ```
+
+## 🔐 Security Features
+
+- **JWT Authentication**: Secure token-based auth with expiration
+- **Password Hashing**: bcrypt for password security
+- **CORS Protection**: Configured cross-origin policies
+- **Input Validation**: Server-side validation and sanitization
+- **SQL Injection Protection**: Parameterized queries
+- **XSS Protection**: Content Security Policy headers
+
+## 🐳 Docker Configuration
+
+### Services Overview
+```yaml
+services:
+  # React Frontend (PWA)
+  client:
+    build: ./client
+    ports: ["${CLIENT_PORT:-80}:80"]
+    depends_on: [server]
+
+  # Node.js Backend API
+  server:
+    build: ./server
+    ports: ["${SERVER_PORT:-5000}:5000"]
+    depends_on: [db]
+    environment:
+      - DB_HOST=db
+
+  # PostgreSQL Database
+  db:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/database.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+```
+
+## 📊 Database Schema
+
+### Tables
+- **users**: User accounts and authentication
+- **budgets**: Budget containers with ownership
+- **user_budgets**: Budget sharing/access permissions
+- **categories**: 50-30-20 category definitions
+- **budget_items**: User-defined budget items with allocated amounts
+- **income**: Income entries with dates
+- **expenses**: Expense entries with categories, descriptions, and optional links to budget items
+
+### 50-30-20 Categories (Pre-configured)
+- **Needs (50%)**: Essential expenses (rent, utilities, groceries)
+- **Wants (30%)**: Discretionary spending (entertainment, dining out)
+- **Savings (20%)**: Emergency fund, debt payments, investments
+
+## 🚀 Deployment Guide
+
+### Local Development
+```bash
+# Clone repository
+git clone <your-repo-url>
+cd saas-budget
+
+# Start with Docker (recommended)
+docker compose up -d
+
+# Or run manually
+cd server && npm install && npm start  # Backend
+cd client && npm install && npm start  # Frontend
+```
+
+### Production Deployment
+
+#### Cloud Platforms
+1. **DigitalOcean Droplet**
+   ```bash
+   # On your droplet
+   git clone <repo-url>
+   cd saas-budget
+   docker compose up -d
+   ```
+
+2. **AWS EC2**
+   ```bash
+   # Install Docker on EC2
+   sudo yum update -y
+   sudo yum install docker -y
+   sudo service docker start
+   
+   # Deploy app
+   git clone <repo-url>
+   cd saas-budget
+   docker compose up -d
+   ```
+
+3. **Google Cloud Platform**
+   ```bash
+   # Use Google Cloud Run or Compute Engine
+   gcloud compute instances create saas-budget-vm
+   # SSH and deploy with Docker
+   ```
+
+#### Deployment Checklist
+- [ ] Update `.env` with production values
+- [ ] Change default admin password
+- [ ] Configure SSL/HTTPS (use Certbot/Let's Encrypt)
+- [ ] Set up database backups
+- [ ] Configure monitoring (logs, uptime)
+- [ ] Update JWT secret to secure random value
+- [ ] Set up reverse proxy (Nginx/Apache) if needed
+- [ ] Configure firewall rules
+
+### SSL/HTTPS Setup (Production)
+```bash
+# Install Certbot
+sudo apt install certbot
+
+# Get SSL certificate
+sudo certbot --nginx -d yourdomain.com
+
+# Auto-renewal
+sudo crontab -e
+# Add: 0 12 * * * /usr/bin/certbot renew --quiet
+```
+
+## 📱 Using the Application
+
+### Getting Started
+1. **Access the App**: Navigate to `http://localhost` (or your domain)
+2. **Login**: Use `admin` / `password` for initial access
+3. **Create Budget**: Click "New Budget" to create your first budget
+4. **Add Income**: Go to "Transactions" → "Add Income" → Enter monthly income
+5. **Add Expenses**: Click "Add Expense" → Select category → Enter details
+6. **Monitor Progress**: View "Overview" for 50-30-20 breakdown
+
+### PWA Installation
+1. **Chrome/Edge**: Look for install icon in address bar
+2. **Safari**: Share menu → "Add to Home Screen"
+3. **Firefox**: Menu → "Install"
+4. **Mobile**: Browser menu → "Add to Home Screen"
+
+### Budget Management Tips
+- **Set Monthly Income**: Add your total monthly income first
+- **Categorize Expenses**: Properly categorize as Needs/Wants/Savings
+- **Monitor Health**: Check budget health indicators regularly
+- **Use Multiple Budgets**: Create separate budgets for different scenarios
+- **Collaborate**: Share budgets with family members or partners
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+#### Application Won't Start
+```bash
+# Check Docker status
+docker compose ps
+
+# Check logs
+docker compose logs
+
+# Restart services
+docker compose restart
+```
+
+#### Database Connection Failed
+```bash
+# Check database logs
+docker compose logs db
+
+# Restart database
+docker compose restart db
+
+# Rebuild if needed
+docker compose down
+docker compose up --build
+```
+
+#### PWA Not Installing
+- Ensure app is served over HTTPS (required for PWA)
+- Check browser compatibility
+- Clear browser cache and reload
+- Check manifest.json is accessible
+
+#### Build Failures
+```bash
+# Clean rebuild
+docker compose down -v
+docker system prune -f
+docker compose build --no-cache
+docker compose up -d
+```
+
+### Performance Tips
+- Use SSD storage for database volumes
+- Configure database connection pooling
+- Enable gzip compression
+- Implement Redis caching for sessions
+- Use CDN for static assets in production
+
+## 📄 File Structure
+```
+saas-budget/
+├── client/                 # React PWA Frontend
+│   ├── public/
+│   │   ├── manifest.json   # PWA manifest
+│   │   ├── index.html
+│   │   └── favicon.ico     # App favicon
+│   │   └── logo192.png     # App icon (192x192)
+│   │   └── logo512.png     # App icon (512x512)
+│   ├── src/
+│   │   ├── components/     # React components
+│   │   │   ├── AdminDashboard.js
+│   │   │   ├── BudgetItemsManager.js # New component for managing budget items
+│   │   │   ├── CreateUserForm.js     # New component for creating users
+│   │   │   ├── Dashboard.js
+│   │   │   ├── Login.js
+│   │   │   └── Reports.js            # Updated for detailed reports
+│   │   ├── App.js         # Main app component
+│   │   ├── App.css
+│   │   ├── index.js
+│   │   └── ... (other React files)
+│   ├── Dockerfile         # Client Docker config
+│   └── package.json
+├── server/                # Node.js Backend
+│   ├── routes/           # API route handlers
+│   │   ├── budgetItems.js  # New route for budget items
+│   │   ├── expenses.js     # Updated for budget_item_id and CSV import
+│   │   ├── reports.js      # Updated for detailed reports
+│   │   └── ... (other routes)
+│   ├── middleware/       # Auth middleware
+│   ├── database.sql      # Database schema (updated)
+│   ├── Dockerfile        # Server Docker config
+│   └── package.json
+├── docker-compose.yml    # Multi-service configuration
+├── .env                  # Environment variables (create from .env.example)
+├── .env.example          # Example environment variables
+└── README.md            # This file
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+### Development Guidelines
+- Follow ESLint configuration
+- Write tests for new features
+- Update documentation
+- Ensure Docker builds successfully
+- Test PWA functionality
+
+## 📄 License
+
+MIT License - see LICENSE file for details.
+
+## 🆘 Support
+
+- 📧 **Issues**: [GitHub Issues](https://github.com/your-username/saas-budget/issues)
+- 📖 **Documentation**: Check this README and inline code comments
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/your-username/saas-budget/discussions)
+
+## 🔮 Roadmap
+
+- [ ] **Mobile App**: React Native version
+- [x] **Import/Export**: CSV data import/export for expenses
+- [ ] **Notifications**: Budget alerts and reminders
+- [ ] **Analytics**: Advanced spending analytics
+- [ ] **Integrations**: Bank account integration
+- [ ] **Multi-Currency**: Support for multiple currencies
+- [ ] **Reports**: PDF budget reports
+- [ ] **Goals**: Savings goals and tracking
+
+---
+
+**SaaS Budget** - Making personal finance management simple, visual, and effective with the proven 50-30-20 budgeting rule.
+
+Built with ❤️ using React, Node.js, PostgreSQL, and Docker.
