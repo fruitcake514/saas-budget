@@ -1,57 +1,50 @@
-version: '3.8'
 services:
   server:
     build:
-      # To build directly from a GitHub repository, uncomment the lines below
-      # and replace with your repository URL and branch/tag.
-      # Ensure the repository is public or you have configured Docker with credentials for private repos.
-      context: https://github.com/your-username/saas-budget.git#main:/server
+      context: https://github.com/fruitcake514/saas-budget.git#main:/server
       dockerfile: Dockerfile
     volumes:
-      - ./server:/usr/src/app
-      - /usr/src/app/node_modules  # Exclude node_modules from mount
+      # Persistent storage for server-side uploads (e.g., CSV imports)
+      - ./uploads:/usr/src/app/uploads
     ports:
-      - "${SERVER_PORT:-5000}:5000"
+      - "5000:5000"
     environment:
-      - DB_USER=${DB_USER}
+      - DB_USER=budget
       - DB_HOST=db
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_PORT=${DB_PORT}
-      - JWT_SECRET=${JWT_SECRET}
-      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
-      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-password}
+      - DB_DATABASE=saasbudget
+      - DB_PASSWORD=saasbudget
+      - DB_PORT=6161
+      - JWT_SECRET=#Replace Me
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=password
+    # Set user and group for the server process inside the container
+    user: "xxx:xxx"
     depends_on:
       db:
         condition: service_healthy
   client:
     build:
-      # To build directly from a GitHub repository, uncomment the lines below
-      # and replace with your repository URL and branch/tag.
-      # Ensure the repository is public or you have configured Docker with credentials for private repos.
-      context: https://github.com/your-username/saas-budget.git#main:/client
+      context: https://github.com/fruitcake514/saas-budget.git#main:/client
       dockerfile: Dockerfile
-    # No volume mount needed for client since it's built and served by nginx
     ports:
-      - "${CLIENT_PORT:-80}:80"
+      - "80:80"
     depends_on:
       server:
         condition: service_started
   db:
-    image: postgres:13
+    build:
+      context: https://github.com/fruitcake514/saas-budget.git#main:/db
+      dockerfile: Dockerfile
     environment:
-      POSTGRES_DB: ${DB_DATABASE}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: saasbudget
+      POSTGRES_USER: budget
+      POSTGRES_PASSWORD: saasbudget
     volumes:
-      - ./server/database.sql:/docker-entrypoint-initdb.d/01-init.sql
-      - pgdata:/var/lib/postgresql/data
+      - ./pgdata:/var/lib/postgresql/data
+    # Set user and group for the postgres process inside the container
+    user: "xxx:xxx"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
+      test: ["CMD-SHELL", "pg_isready -U budget -d saasbudget"]
       interval: 5s
       timeout: 5s
       retries: 5
-    
-
-volumes:
-  pgdata:
