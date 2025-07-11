@@ -2,10 +2,14 @@ version: '3.8'
 services:
   server:
     build:
-      context: ./server
+      # To build directly from a GitHub repository, uncomment the lines below
+      # and replace with your repository URL and branch/tag.
+      # Ensure the repository is public or you have configured Docker with credentials for private repos.
+      context: https://github.com/your-username/saas-budget.git#main:/server
       dockerfile: Dockerfile
     volumes:
       - ./server:/usr/src/app
+      - /usr/src/app/node_modules  # Exclude node_modules from mount
     ports:
       - "${SERVER_PORT:-5000}:5000"
     environment:
@@ -18,28 +22,36 @@ services:
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-password}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   client:
     build:
-      context: ./client
+      # To build directly from a GitHub repository, uncomment the lines below
+      # and replace with your repository URL and branch/tag.
+      # Ensure the repository is public or you have configured Docker with credentials for private repos.
+      context: https://github.com/your-username/saas-budget.git#main:/client
       dockerfile: Dockerfile
-    volumes:
-      - ./client:/usr/src/app
+    # No volume mount needed for client since it's built and served by nginx
     ports:
       - "${CLIENT_PORT:-80}:80"
     depends_on:
-      - server
+      server:
+        condition: service_started
   db:
     image: postgres:13
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_DATABASE}
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
+      - ./server/database.sql:/docker-entrypoint-initdb.d/01-init.sql
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    
 
 volumes:
   pgdata:
-  # Uncomment the following lines if you enable volumes for server or client logs/data
-  # server_logs:
-  # client_logs:
