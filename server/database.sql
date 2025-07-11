@@ -32,10 +32,19 @@ CREATE TABLE categories (
     user_id INT REFERENCES users(user_id) NULL -- Null for predefined categories
 );
 
+CREATE TABLE budget_items (
+    budget_item_id SERIAL PRIMARY KEY,
+    budget_id INT REFERENCES budgets(budget_id) ON DELETE CASCADE,
+    category_id INT REFERENCES categories(category_id) ON DELETE CASCADE,
+    item_name VARCHAR(255) NOT NULL,
+    allocated_amount DECIMAL(10, 2) NOT NULL
+);
+
 CREATE TABLE expenses (
     expense_id SERIAL PRIMARY KEY,
-    budget_id INT REFERENCES budgets(budget_id),
-    category_id INT REFERENCES categories(category_id),
+    budget_id INT REFERENCES budgets(budget_id) ON DELETE CASCADE,
+    category_id INT REFERENCES categories(category_id) ON DELETE CASCADE,
+    budget_item_id INT REFERENCES budget_items(budget_item_id) ON DELETE SET NULL,
     amount DECIMAL(10, 2) NOT NULL,
     expense_date DATE NOT NULL,
     description VARCHAR(255)
