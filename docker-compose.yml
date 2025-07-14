@@ -1,27 +1,23 @@
 services:
-  server:
-    build:
-      context: ./server
-      dockerfile: Dockerfile
-    volumes:
-      # Persistent storage for server-side uploads (e.g., CSV imports)
-      - ./uploads:/usr/src/app/uploads
-      # Persistent storage for SQLite database
-      - ./data:/usr/src/app/data
-    ports:
-      - "5000:5000"
-    environment:
-      - JWT_SECRET=#Replace Me
-      - ADMIN_USERNAME=admin
-      - ADMIN_PASSWORD=password
-    # Set user and group for the server process inside the container
-    # user: "xxx:xxx"
   client:
     build:
       context: ./client
       dockerfile: Dockerfile
-    ports:
-      - "80:80"
     depends_on:
       server:
         condition: service_started
+    ports:
+      - '80:80'
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      - JWT_SECRET=REPLACEME
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=password
+    ports:
+      - '80:5000'
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+      - ./data:/usr/src/app/data
