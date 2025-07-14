@@ -1,6 +1,6 @@
 {
-  "short_name": "SaaS Budget",
-  "name": "SaaS Budget - 50-30-20 Smart Budgeting",
+  "short_name": "OpenBudget",
+  "name": "OpenBudget - 50-30-20 Smart Budgeting",
   "description": "A modern Progressive Web App for budget management using the proven 50-30-20 budgeting rule",
   "icons": [
     {
@@ -23,85 +23,10 @@
   ],
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "theme_color": "#00b4d8",
   "background_color": "#0a0e27",
-  "categories": ["finance", "productivity", "utilities"],
+  "categories": ["finance", "productivity"],
   "scope": "/",
-  "lang": "en-US",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "prefer_related_applications": false,
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-  "shortcuts": [
-    {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "View your budget dashboard",
-      "url": "/",
-      "icons": [
-        {
-          "src": "logo192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "Add Expense",
-      "short_name": "Add Expense",
-      "description": "Quick add expense",
-      "url": "/?action=add-expense",
-      "icons": [
-        {
-          "src": "logo192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    },
-    {
-      "name": "View Reports",
-      "short_name": "Reports",
-      "description": "View budget reports",
-      "url": "/?action=reports",
-      "icons": [
-        {
-          "src": "logo192.png",
-          "sizes": "192x192",
-          "type": "image/png"
-        }
-      ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "logo512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "SaaS Budget Dashboard"
-    },
-    {
-      "src": "logo192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "SaaS Budget Mobile"
-    }
-  ],
-  "related_applications": [],
-  "protocol_handlers": [],
-  "file_handlers": [],
-  "share_target": {
-    "action": "/",
-    "method": "GET",
-    "enctype": "application/x-www-form-urlencoded",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  }
+  "lang": "en-US"
 }

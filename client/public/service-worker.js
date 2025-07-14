@@ -1,6 +1,6 @@
-const CACHE_NAME = 'saas-budget-v1.1';
-const OFFLINE_CACHE = 'saas-budget-offline-v1';
-const API_CACHE = 'saas-budget-api-v1';
+const CACHE_NAME = 'openbudget-v1.1';
+const OFFLINE_CACHE = 'openbudget-offline-v1';
+const API_CACHE = 'openbudget-api-v1';
 
 // Static assets to cache
 const urlsToCache = [
@@ -118,37 +118,3 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Background sync for offline actions
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'background-sync') {
-    event.waitUntil(doBackgroundSync());
-  }
-});
-
-async function doBackgroundSync() {
-  // Handle offline actions when back online
-  console.log('Background sync triggered');
-}
-
-// Push notifications (if needed later)
-self.addEventListener('push', (event) => {
-  if (event.data) {
-    const data = event.data.json();
-    event.waitUntil(
-      self.registration.showNotification(data.title, {
-        body: data.body,
-        icon: '/logo192.png',
-        badge: '/logo192.png',
-        tag: 'saas-budget-notification'
-      })
-    );
-  }
-});
-
-// Notification click handler
-self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/')
-  );
-});
