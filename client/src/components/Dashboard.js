@@ -503,7 +503,7 @@ const Dashboard = ({ token, user }) => {
         }}>
           <Toolbar>
             <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700 }}>
-              SaaS Budget
+              OpenBudget
             </Typography>
             {!isMobile && (
               <Typography variant="body2" sx={{ mr: 2 }}>

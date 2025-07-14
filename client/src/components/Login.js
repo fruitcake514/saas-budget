@@ -97,7 +97,7 @@ const Login = ({ setToken }) => {
                   color: 'transparent',
                 }}
               >
-                SaaS Budget
+                OpenBudget
               </Typography>
               <Typography variant="h6" color="text.secondary">
                 50-30-20 Smart Budgeting

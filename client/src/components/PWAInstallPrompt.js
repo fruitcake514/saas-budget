@@ -80,7 +80,7 @@ const PWAInstallPrompt = ({ open, onClose }) => {
       case 'android':
         return canInstall ? (
           <Typography variant="body2" sx={{ mt: 2 }}>
-            Tap "Install" below to add SaaS Budget to your home screen for quick access.
+            Tap "Install" below to add OpenBudget to your home screen for quick access.
           </Typography>
         ) : (
           <Box sx={{ textAlign: 'left', mt: 2 }}>
@@ -97,7 +97,7 @@ const PWAInstallPrompt = ({ open, onClose }) => {
       default:
         return (
           <Typography variant="body2" sx={{ mt: 2 }}>
-            Install SaaS Budget for quick access and offline functionality.
+            Install OpenBudget for quick access and offline functionality.
           </Typography>
         );
     }
@@ -127,7 +127,7 @@ const PWAInstallPrompt = ({ open, onClose }) => {
           alignItems: 'center',
           pb: 1
         }}>
-          <Typography variant="h6">Install SaaS Budget</Typography>
+          <Typography variant="h6">Install OpenBudget</Typography>
           <IconButton
             onClick={onClose}
             sx={{ color: '#ffffff' }}
@@ -146,7 +146,7 @@ const PWAInstallPrompt = ({ open, onClose }) => {
           </Typography>
           
           <Typography variant="body1" paragraph>
-            Install SaaS Budget as a native app on your device for:
+            Install OpenBudget as a native app on your device for:
           </Typography>
           
           <Box sx={{ textAlign: 'left', mb: 3 }}>
