@@ -657,6 +657,18 @@ const Dashboard = ({ token, user }) => {
               variant="scrollable"
               scrollButtons="auto"
               allowScrollButtonsMobile
+              sx={{
+                '& .MuiTabs-flexContainer': {
+                  minWidth: 'fit-content',
+                },
+                '& .MuiTabs-scroller': {
+                  overflow: 'auto !important',
+                },
+                '& .MuiTab-root': {
+                  minWidth: isMobile ? 80 : 120,
+                  fontSize: isMobile ? '0.8rem' : '0.875rem',
+                },
+              }}
             >
               <Tab label="Overview" />
               <Tab label="Transactions" />
