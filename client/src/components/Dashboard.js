@@ -30,7 +30,11 @@ import {
   Alert,
   Tab,
   Tabs,
-  InputAdornment
+  InputAdornment,
+  Fab,
+  Zoom,
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -42,7 +46,8 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Save as SaveIcon,
-  Cancel as CancelIcon
+  Cancel as CancelIcon,
+  GetApp as InstallIcon
 } from '@mui/icons-material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { Doughnut } from 'react-chartjs-2';
@@ -50,6 +55,8 @@ import Reports from './Reports';
 import { useSnackbar } from 'notistack';
 import CreateUserForm from './CreateUserForm';
 import BudgetItemManager from './BudgetItemManager';
+import PWAInstallPrompt from './PWAInstallPrompt';
+import { usePWAInstall } from '../hooks/usePWAInstall';
 
 const darkTheme = createTheme({
   palette: {
@@ -93,6 +100,10 @@ const darkTheme = createTheme({
 
 const Dashboard = ({ token, user }) => {
   const { enqueueSnackbar } = useSnackbar();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { canInstall, isInstalled } = usePWAInstall();
+  
   const [currentTab, setCurrentTab] = useState(0);
   const [budgets, setBudgets] = useState([]);
   const [selectedBudget, setSelectedBudget] = useState('');
@@ -106,6 +117,7 @@ const Dashboard = ({ token, user }) => {
   const [expenseDialog, setExpenseDialog] = useState(false);
   const [budgetDialog, setBudgetDialog] = useState(false);
   const [csvImportDialog, setCsvImportDialog] = useState(false);
+  const [showPWAInstall, setShowPWAInstall] = useState(false);
   
   // Form states
   const [newIncome, setNewIncome] = useState({ amount: '', date: new Date().toISOString().split('T')[0] });
@@ -135,7 +147,15 @@ const Dashboard = ({ token, user }) => {
     if (user && user.is_admin) {
       fetchUsers();
     }
-  }, [token, user]);
+    
+    // Show PWA install prompt after 5 seconds if not installed and can install
+    if (canInstall && !isInstalled) {
+      const timer = setTimeout(() => {
+        setShowPWAInstall(true);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [token, user, canInstall, isInstalled]);
 
   useEffect(() => {
     if (selectedBudget) {
@@ -235,7 +255,6 @@ const Dashboard = ({ token, user }) => {
         amount: parseFloat(newIncome.amount),
         income_date: newIncome.date
       };
-      console.log('Sending income payload:', payload);
       
       await axios.post('/api/income', payload, {
         headers: { 'x-auth-token': token }
@@ -258,7 +277,6 @@ const Dashboard = ({ token, user }) => {
         description: newExpense.description,
         budget_item_id: newExpense.budget_item_id || null
       };
-      console.log('Sending expense payload:', payload);
       
       await axios.post('/api/expenses', payload, {
         headers: { 'x-auth-token': token }
@@ -409,16 +427,8 @@ const Dashboard = ({ token, user }) => {
     }
   };
 
-  // Debugging logs for overview calculations
-  console.log('Selected Budget:', selectedBudget);
-  console.log('Categories:', JSON.stringify(categories, null, 2));
-  console.log('Expenses:', JSON.stringify(expenses, null, 2));
-  console.log('Budget Items:', JSON.stringify(budgetItems, null, 2));
-  console.log('Income:', JSON.stringify(income, null, 2));
-
   // Calculate budget data
   const totalIncome = income.reduce((sum, item) => sum + parseFloat(item.amount || 0), 0);
-  console.log('Total Income:', totalIncome);
 
   const needsBudget = totalIncome * 0.5;
   const wantsBudget = totalIncome * 0.3;
@@ -495,9 +505,20 @@ const Dashboard = ({ token, user }) => {
             <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700 }}>
               SaaS Budget
             </Typography>
-            <Typography variant="body2" sx={{ mr: 2 }}>
-              Welcome, {user?.username}
-            </Typography>
+            {!isMobile && (
+              <Typography variant="body2" sx={{ mr: 2 }}>
+                Welcome, {user?.username}
+              </Typography>
+            )}
+            {canInstall && !isInstalled && (
+              <IconButton 
+                color="inherit" 
+                onClick={() => setShowPWAInstall(true)}
+                sx={{ mr: 1 }}
+              >
+                <InstallIcon />
+              </IconButton>
+            )}
             <IconButton color="inherit" onClick={handleLogout}>
               <LogoutIcon />
             </IconButton>
@@ -645,12 +666,32 @@ const Dashboard = ({ token, user }) => {
                   <Paper sx={{ p: 3 }}>
                     <Typography variant="h6" gutterBottom>Budget Breakdown</Typography>
                     {totalIncome > 0 ? (
-                      <Doughnut data={chartData} options={{ 
-                        responsive: true,
-                        plugins: {
-                          legend: { position: 'bottom' }
-                        }
-                      }} />
+                      <Box sx={{ 
+                        height: isMobile ? 300 : 400, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center' 
+                      }}>
+                        <Doughnut 
+                          data={chartData} 
+                          options={{ 
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                              legend: { 
+                                position: isMobile ? 'bottom' : 'right',
+                                labels: {
+                                  boxWidth: isMobile ? 12 : 16,
+                                  padding: isMobile ? 10 : 15,
+                                  font: {
+                                    size: isMobile ? 12 : 14
+                                  }
+                                }
+                              }
+                            }
+                          }} 
+                        />
+                      </Box>
                     ) : (
                       <Alert severity="info">Add income to see budget breakdown</Alert>
                     )}
@@ -881,7 +922,13 @@ const Dashboard = ({ token, user }) => {
         </Container>
 
         {/* Add Income Dialog */}
-        <Dialog open={incomeDialog} onClose={() => setIncomeDialog(false)}>
+        <Dialog 
+          open={incomeDialog} 
+          onClose={() => setIncomeDialog(false)}
+          fullScreen={isMobile}
+          maxWidth="sm"
+          fullWidth
+        >
           <DialogTitle>Add Income</DialogTitle>
           <DialogContent>
             <TextField
@@ -909,14 +956,20 @@ const Dashboard = ({ token, user }) => {
               InputLabelProps={{ shrink: true }}
             />
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setIncomeDialog(false)}>Cancel</Button>
-            <Button onClick={handleAddIncome} variant="contained">Add</Button>
+          <DialogActions sx={{ flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 1 : 0 }}>
+            <Button onClick={() => setIncomeDialog(false)} fullWidth={isMobile}>Cancel</Button>
+            <Button onClick={handleAddIncome} variant="contained" fullWidth={isMobile}>Add</Button>
           </DialogActions>
         </Dialog>
 
         {/* Add Expense Dialog */}
-        <Dialog open={expenseDialog} onClose={() => setExpenseDialog(false)}>
+        <Dialog 
+          open={expenseDialog} 
+          onClose={() => setExpenseDialog(false)}
+          fullScreen={isMobile}
+          maxWidth="sm"
+          fullWidth
+        >
           <DialogTitle>Add Expense</DialogTitle>
           <DialogContent>
             <TextField
@@ -982,9 +1035,9 @@ const Dashboard = ({ token, user }) => {
               InputLabelProps={{ shrink: true }}
             />
           </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setExpenseDialog(false)}>Cancel</Button>
-            <Button onClick={handleAddExpense} variant="contained">Add</Button>
+          <DialogActions sx={{ flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? 1 : 0 }}>
+            <Button onClick={() => setExpenseDialog(false)} fullWidth={isMobile}>Cancel</Button>
+            <Button onClick={handleAddExpense} variant="contained" fullWidth={isMobile}>Add</Button>
           </DialogActions>
         </Dialog>
 
@@ -1299,6 +1352,34 @@ const Dashboard = ({ token, user }) => {
             </Button>
           </DialogActions>
         </Dialog>
+
+        {/* PWA Install Prompt */}
+        <PWAInstallPrompt 
+          open={showPWAInstall} 
+          onClose={() => setShowPWAInstall(false)} 
+        />
+
+        {/* Floating Action Button for Mobile */}
+        {isMobile && (
+          <Zoom in={currentTab === 1}>
+            <Fab
+              color="primary"
+              aria-label="add"
+              sx={{
+                position: 'fixed',
+                bottom: 80,
+                right: 20,
+                background: 'linear-gradient(45deg, #00b4d8, #0077b6)',
+                '&:hover': {
+                  background: 'linear-gradient(45deg, #0077b6, #005f73)',
+                }
+              }}
+              onClick={() => setExpenseDialog(true)}
+            >
+              <AddIcon />
+            </Fab>
+          </Zoom>
+        )}
       </Box>
     </ThemeProvider>
   );
