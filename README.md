@@ -1,4 +1,4 @@
-# SaaS Budget - 50-30-20 Smart Budgeting PWA
+# OpenBudget - 50-30-20 Smart Budgeting PWA
 
 A modern, sleek Progressive Web App (PWA) for budget management using the proven 50-30-20 budgeting rule. Built with React, Node.js, SQLite, and Docker.
 
