@@ -11,9 +11,14 @@ router.post('/register', auth, async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const newUser = await pool.query(
-      'INSERT INTO users (username, password, is_admin) VALUES ($1, $2, $3) RETURNING *',
+    const result = await pool.query(
+      'INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)',
       [username, hashedPassword, is_admin]
+    );
+
+    const newUser = await pool.query(
+      'SELECT * FROM users WHERE user_id = ?',
+      [result.rows[0].id]
     );
 
     res.json(newUser.rows[0]);
@@ -27,7 +32,7 @@ router.post('/register', auth, async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const user = await pool.query('SELECT * FROM users WHERE username = $1', [
+    const user = await pool.query('SELECT * FROM users WHERE username = ?', [
       username,
     ]);
 
@@ -78,14 +83,20 @@ router.put('/:id', auth, async (req, res) => {
     if (password) {
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
-      updateQuery = 'UPDATE users SET username = $1, password = $2, is_admin = $3 WHERE user_id = $4 RETURNING user_id, username, is_admin';
+      updateQuery = 'UPDATE users SET username = ?, password = ?, is_admin = ? WHERE user_id = ?';
       values = [username, hashedPassword, is_admin, id];
     } else {
-      updateQuery = 'UPDATE users SET username = $1, is_admin = $2 WHERE user_id = $3 RETURNING user_id, username, is_admin';
+      updateQuery = 'UPDATE users SET username = ?, is_admin = ? WHERE user_id = ?';
       values = [username, is_admin, id];
     }
     
-    const updatedUser = await pool.query(updateQuery, values);
+    await pool.query(updateQuery, values);
+    
+    const updatedUser = await pool.query(
+      'SELECT user_id, username, is_admin FROM users WHERE user_id = ?',
+      [id]
+    );
+    
     res.json(updatedUser.rows[0]);
   } catch (err) {
     console.error(err.message);
@@ -106,7 +117,7 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(400).json('Cannot delete your own account');
     }
     
-    await pool.query('DELETE FROM users WHERE user_id = $1', [id]);
+    await pool.query('DELETE FROM users WHERE user_id = ?', [id]);
     res.json({ message: 'User deleted successfully' });
   } catch (err) {
     console.error(err.message);

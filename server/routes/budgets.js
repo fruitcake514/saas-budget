@@ -6,14 +6,19 @@ const auth = require('../middleware/auth');
 router.post('/', auth, async (req, res) => {
   try {
     const { budget_name } = req.body;
-    const newBudget = await pool.query(
-      'INSERT INTO budgets (budget_name, owner_id) VALUES ($1, $2) RETURNING *',
+    const result = await pool.query(
+      'INSERT INTO budgets (budget_name, owner_id) VALUES (?, ?)',
       [budget_name, req.user.user_id]
     );
 
     await pool.query(
-      'INSERT INTO user_budgets (user_id, budget_id) VALUES ($1, $2)',
-      [req.user.user_id, newBudget.rows[0].budget_id]
+      'INSERT INTO user_budgets (user_id, budget_id) VALUES (?, ?)',
+      [req.user.user_id, result.rows[0].id]
+    );
+
+    const newBudget = await pool.query(
+      'SELECT * FROM budgets WHERE budget_id = ?',
+      [result.rows[0].id]
     );
 
     res.json(newBudget.rows[0]);
@@ -27,7 +32,7 @@ router.post('/', auth, async (req, res) => {
 router.get('/', auth, async (req, res) => {
   try {
     const allBudgets = await pool.query(
-      'SELECT * FROM budgets WHERE budget_id IN (SELECT budget_id FROM user_budgets WHERE user_id = $1)',
+      'SELECT * FROM budgets WHERE budget_id IN (SELECT budget_id FROM user_budgets WHERE user_id = ?)',
       [req.user.user_id]
     );
     res.json(allBudgets.rows);
@@ -43,7 +48,7 @@ router.post('/share', auth, async (req, res) => {
     const { budget_id, share_with_username } = req.body;
 
     const budget = await pool.query(
-      'SELECT * FROM budgets WHERE budget_id = $1 AND owner_id = $2',
+      'SELECT * FROM budgets WHERE budget_id = ? AND owner_id = ?',
       [budget_id, req.user.user_id]
     );
 
@@ -52,7 +57,7 @@ router.post('/share', auth, async (req, res) => {
     }
 
     const shareWithUser = await pool.query(
-      'SELECT * FROM users WHERE username = $1',
+      'SELECT * FROM users WHERE username = ?',
       [share_with_username]
     );
 
@@ -61,7 +66,7 @@ router.post('/share', auth, async (req, res) => {
     }
 
     await pool.query(
-      'INSERT INTO user_budgets (user_id, budget_id) VALUES ($1, $2)',
+      'INSERT INTO user_budgets (user_id, budget_id) VALUES (?, ?)',
       [shareWithUser.rows[0].user_id, budget_id]
     );
 
@@ -79,7 +84,7 @@ router.put('/:id', auth, async (req, res) => {
     const { budget_name } = req.body;
 
     const budget = await pool.query(
-      'SELECT * FROM budgets WHERE budget_id = $1 AND owner_id = $2',
+      'SELECT * FROM budgets WHERE budget_id = ? AND owner_id = ?',
       [id, req.user.user_id]
     );
 
@@ -87,9 +92,14 @@ router.put('/:id', auth, async (req, res) => {
       return res.status(401).json('You are not the owner of this budget');
     }
 
-    const updatedBudget = await pool.query(
-      'UPDATE budgets SET budget_name = $1 WHERE budget_id = $2 RETURNING *',
+    await pool.query(
+      'UPDATE budgets SET budget_name = ? WHERE budget_id = ?',
       [budget_name, id]
+    );
+
+    const updatedBudget = await pool.query(
+      'SELECT * FROM budgets WHERE budget_id = ?',
+      [id]
     );
 
     res.json(updatedBudget.rows[0]);
@@ -105,7 +115,7 @@ router.delete('/:id', auth, async (req, res) => {
     const { id } = req.params;
 
     const budget = await pool.query(
-      'SELECT * FROM budgets WHERE budget_id = $1 AND owner_id = $2',
+      'SELECT * FROM budgets WHERE budget_id = ? AND owner_id = ?',
       [id, req.user.user_id]
     );
 
@@ -114,10 +124,10 @@ router.delete('/:id', auth, async (req, res) => {
     }
 
     // Delete related records first
-    await pool.query('DELETE FROM expenses WHERE budget_id = $1', [id]);
-    await pool.query('DELETE FROM income WHERE budget_id = $1', [id]);
-    await pool.query('DELETE FROM user_budgets WHERE budget_id = $1', [id]);
-    await pool.query('DELETE FROM budgets WHERE budget_id = $1', [id]);
+    await pool.query('DELETE FROM expenses WHERE budget_id = ?', [id]);
+    await pool.query('DELETE FROM income WHERE budget_id = ?', [id]);
+    await pool.query('DELETE FROM user_budgets WHERE budget_id = ?', [id]);
+    await pool.query('DELETE FROM budgets WHERE budget_id = ?', [id]);
 
     res.json({ message: 'Budget deleted successfully' });
   } catch (err) {
