@@ -1,7 +1,7 @@
 {
-  "name": "saas-budget-server",
+  "name": "openbudget-server",
   "version": "1.0.0",
-  "description": "Server for the SaaS Budget application",
+  "description": "Server for the OpenBudget application",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
