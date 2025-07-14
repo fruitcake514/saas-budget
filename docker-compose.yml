@@ -1,23 +1,25 @@
 services:
   client:
     build:
-      context: ./client
+      context: https://github.com/fruitcake514/saas-budget.git#main:client
       dockerfile: Dockerfile
     depends_on:
       server:
         condition: service_started
     ports:
       - '80:80'
+    user: 'xxx:xxx'
   server:
     build:
-      context: ./server
+      context: https://github.com/fruitcake514/saas-budget.git#main:server
       dockerfile: Dockerfile
     environment:
-      - JWT_SECRET=REPLACEME
+      - JWT_SECRET=ChangeME
       - ADMIN_USERNAME=admin
       - ADMIN_PASSWORD=password
     ports:
-      - '80:5000'
+      - '5000:5000'
+    user: 'xxx:xxx'
     volumes:
       - ./uploads:/usr/src/app/uploads
       - ./data:/usr/src/app/data
