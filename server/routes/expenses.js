@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const pool = require('../db');
 const auth = require('../middleware/auth');
+const fs = require('fs');
 
 // Add expense
 router.post('/', auth, async (req, res) => {
@@ -74,8 +75,6 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-module.exports = router;
-
 const csv = require('csv-parser');
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
@@ -118,3 +117,5 @@ router.post('/import-csv', auth, upload.single('csvFile'), async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+module.exports = router;
