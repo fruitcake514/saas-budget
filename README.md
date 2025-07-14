@@ -1,6 +1,6 @@
 # SaaS Budget - 50-30-20 Smart Budgeting PWA
 
-A modern, sleek Progressive Web App (PWA) for budget management using the proven 50-30-20 budgeting rule. Built with React, Node.js, PostgreSQL, and Docker.
+A modern, sleek Progressive Web App (PWA) for budget management using the proven 50-30-20 budgeting rule. Built with React, Node.js, SQLite, and Docker.
 
 ![SaaS Budget](https://img.shields.io/badge/SaaS-Budget-blue?style=for-the-badge)
 ![Docker](https://img.shields.io/badge/Docker-Ready-blue?style=flat-square&logo=docker)
@@ -25,12 +25,13 @@ A modern, sleek Progressive Web App (PWA) for budget management using the proven
 - **Budget Health**: Real-time indicators showing budget status
 
 ### 📊 **Data Visualization & Reporting**
-- **Interactive Charts**: Doughnut charts for budget breakdown
+- **Interactive Charts**: Mobile-responsive doughnut charts for budget breakdown
 - **Progress Indicators**: Visual progress bars for each category and individual budget item
 - **Dashboard Analytics**: Comprehensive financial overview
 - **Detailed Expense Reports**: Generate 30-day reports with individual expense items
+- **Mobile-Optimized Reports**: Card-based expense reports with expandable details on mobile
 - **CSV Export for Reports**: Export detailed expense reports to CSV
-- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Responsive Design**: Fully optimized for desktop, tablet, and mobile devices
 
 ### 🔐 **User Management**
 - **JWT Authentication**: Secure token-based authentication
@@ -39,10 +40,13 @@ A modern, sleek Progressive Web App (PWA) for budget management using the proven
 - **Admin Panel**: User creation and management
 
 ### 🎨 **Modern UI/UX**
-- **Dark Theme**: Sleek, modern dark interface
-- **PWA Support**: Installable app with offline capabilities
-- **Material Design**: Beautiful, intuitive user interface
-- **Responsive Layout**: Optimized for all screen sizes
+- **Dark Theme**: Sleek, modern dark interface with gradient backgrounds
+- **PWA Support**: Full Progressive Web App with offline capabilities and native app feel
+- **Material Design**: Beautiful, intuitive user interface with Material-UI components
+- **Mobile-First Design**: Touch-optimized interface with proper accessibility
+- **Responsive Layout**: Adaptive layouts for mobile, tablet, and desktop
+- **Smart Install Prompts**: Platform-aware PWA installation guidance
+- **Floating Action Buttons**: Quick access to common actions on mobile
 
 ## 🚀 Quick Start
 
@@ -89,9 +93,9 @@ The application uses environment variables for configuration. These are typicall
 
 ```env
 # Database Configuration
-DB_USER=postgres
+DB_USER=user
 DB_HOST=db
-DB_DATABASE=budget_app
+DB_DATABASE=saasbudget.db
 DB_PASSWORD=password123
 DB_PORT=5432
 
@@ -162,48 +166,56 @@ docker compose ps
 ### Services
 - **Frontend**: React PWA with Material-UI (Port 80)
 - **Backend**: Node.js/Express REST API (Port 5000)
-- **Database**: PostgreSQL with persistent volumes
+- **Database**: SQLite with persistent volumes
 - **Reverse Proxy**: Nginx for serving React build
 
 ### Tech Stack
 ```
 Frontend:
 ├── React 18
-├── Material-UI (MUI)
-├── Chart.js
-├── Axios
-├── JWT Decode
-└── PWA Support
+├── Material-UI (MUI) with responsive design
+├── Chart.js with mobile optimization
+├── Axios for API communication
+├── JWT Decode for authentication
+├── Advanced PWA support with service workers
+├── Custom hooks for PWA install detection
+└── Mobile-first responsive design
 
 Backend:
 ├── Node.js
 ├── Express.js
-├── PostgreSQL
+├── SQLite
 ├── JWT Authentication
-├── bcrypt
-└── CORS
+├── bcrypt for password security
+├── CORS configuration
+└── RESTful API design
 
 Infrastructure:
 ├── Docker & Docker Compose
-├── Nginx
-├── PostgreSQL
-└── Multi-stage builds
+├── Nginx for production serving
+├── SQLite with persistent volumes
+├── Multi-stage Docker builds
+└── Production-ready deployment
 ```
 
 ## 📱 PWA Features
 
 ### Installation
-1. Visit the app in a modern browser
-2. Look for "Install App" prompt or browser menu
-3. Click "Install" to add to home screen
-4. App runs like a native application
+1. Visit the app in a modern browser (Chrome, Edge, Safari, Firefox)
+2. Look for the install icon in the app header or browser prompt
+3. Click "Install App" to add to home screen/desktop
+4. App runs like a native application with custom app icon
 
-### PWA Capabilities
-- **Offline Support**: Core functionality works without internet
-- **App Icon**: Custom app icon on home screen
-- **Full Screen**: Runs in full-screen mode like native apps
-- **Fast Loading**: Service worker caching for instant startup
-- **Background Sync**: Sync data when connection returns
+### Advanced PWA Capabilities
+- **Smart Offline Support**: Advanced service worker with API caching and offline fallbacks
+- **Native App Experience**: Standalone display mode with custom splash screen
+- **Platform Detection**: Automatic platform-specific installation instructions
+- **App Shortcuts**: Quick actions available from home screen/app launcher
+- **Background Sync**: Automatic data synchronization when connection returns
+- **Share Target**: Receive shared content from other apps (budget notes, receipts)
+- **Push Notifications**: Ready for budget alerts and reminders (future feature)
+- **Fast Loading**: Aggressive caching strategy for instant app startup
+- **Mobile Optimizations**: Touch targets, safe area handling, and gesture support
 
 ## 🔧 API Documentation
 
@@ -296,18 +308,15 @@ services:
     environment:
       - DB_HOST=db
 
-  # PostgreSQL Database
+  # SQLite Database
   db:
-    image: postgres:13
+    image: nouchka/sqlite3-web
     environment:
-      - POSTGRES_DB=${DB_DATABASE}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - SQLITE_DATABASE=saasbudget.db
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./server/database.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./data:/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_DATABASE}"]
+      test: ["CMD-SHELL", "ls /data/saasbudget.db"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -410,10 +419,11 @@ sudo crontab -e
 6. **Monitor Progress**: View "Overview" for 50-30-20 breakdown
 
 ### PWA Installation
-1. **Chrome/Edge**: Look for install icon in address bar
+1. **Chrome/Edge**: Look for install icon in the app header or browser prompt
 2. **Safari**: Share menu → "Add to Home Screen"
-3. **Firefox**: Menu → "Install"
-4. **Mobile**: Browser menu → "Add to Home Screen"
+3. **Firefox**: Menu → "Install" or address bar icon
+4. **Mobile**: Install prompt appears automatically, or use browser menu → "Add to Home Screen"
+5. **Smart Prompts**: App provides platform-specific installation guidance
 
 ### Budget Management Tips
 - **Set Monthly Income**: Add your total monthly income first
@@ -452,10 +462,12 @@ docker compose up --build
 ```
 
 #### PWA Not Installing
-- Ensure app is served over HTTPS (required for PWA)
-- Check browser compatibility
+- Ensure app is served over HTTPS (required for PWA in production)
+- Check browser compatibility (Chrome, Edge, Safari, Firefox supported)
 - Clear browser cache and reload
-- Check manifest.json is accessible
+- Check manifest.json is accessible at `/manifest.json`
+- Look for install icon in app header (not just browser address bar)
+- Try manual installation via browser menu
 
 #### Build Failures
 ```bash
@@ -478,22 +490,29 @@ docker compose up -d
 saas-budget/
 ├── client/                 # React PWA Frontend
 │   ├── public/
-│   │   ├── manifest.json   # PWA manifest
+│   │   ├── manifest.json   # Enhanced PWA manifest with shortcuts
+│   │   ├── service-worker.js # Advanced service worker with offline support
+│   │   ├── offline.html    # Offline fallback page
 │   │   ├── index.html
-│   │   └── favicon.ico     # App favicon
-│   │   └── logo192.png     # App icon (192x192)
+│   │   ├── favicon.ico     # App favicon
+│   │   ├── logo192.png     # App icon (192x192)
 │   │   └── logo512.png     # App icon (512x512)
 │   ├── src/
 │   │   ├── components/     # React components
-│   │   │   ├── AdminDashboard.js
-│   │   │   ├── BudgetItemsManager.js # New component for managing budget items
-│   │   │   ├── CreateUserForm.js     # New component for creating users
-│   │   │   ├── Dashboard.js
+│   │   │   ├── BudgetItemManager.js # Component for managing budget items
+│   │   │   ├── CreateUserForm.js    # Component for creating users
+│   │   │   ├── Dashboard.js         # Enhanced with PWA features
+│   │   │   ├── ErrorBoundary.js     # Error handling component
+│   │   │   ├── LoadingSpinner.js    # Mobile-optimized loading states
 │   │   │   ├── Login.js
-│   │   │   └── Reports.js            # Updated for detailed reports
-│   │   ├── App.js         # Main app component
+│   │   │   ├── PWAInstallPrompt.js  # Smart PWA installation component
+│   │   │   └── Reports.js           # Mobile-optimized reports
+│   │   ├── hooks/
+│   │   │   └── usePWAInstall.js     # Custom hook for PWA detection
+│   │   ├── App.js         # Main app with error boundaries
 │   │   ├── App.css
-│   │   ├── index.js
+│   │   ├── index.css      # Enhanced with mobile media queries
+│   │   ├── index.js       # Service worker registration
 │   │   └── ... (other React files)
 │   ├── Dockerfile         # Client Docker config
 │   └── package.json
@@ -553,4 +572,4 @@ MIT License - see LICENSE file for details.
 
 **SaaS Budget** - Making personal finance management simple, visual, and effective with the proven 50-30-20 budgeting rule.
 
-Built with ❤️ using React, Node.js, PostgreSQL, and Docker.
+Built with ❤️ using React, Node.js, SQLite, and Docker.
