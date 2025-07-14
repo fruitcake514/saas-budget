@@ -60,7 +60,7 @@ function App() {
   if (isLoading) {
     return (
       <LoadingSpinner 
-        message="Loading SaaS Budget..." 
+        message="Loading OpenBudget..." 
         fullscreen={true}
         size={60}
       />
