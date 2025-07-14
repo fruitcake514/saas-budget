@@ -651,7 +651,13 @@ const Dashboard = ({ token, user }) => {
 
           {/* Main Content Tabs */}
           <Paper sx={{ mb: 3 }}>
-            <Tabs value={currentTab} onChange={(e, v) => setCurrentTab(v)}>
+            <Tabs 
+              value={currentTab} 
+              onChange={(e, v) => setCurrentTab(v)}
+              variant="scrollable"
+              scrollButtons="auto"
+              allowScrollButtonsMobile
+            >
               <Tab label="Overview" />
               <Tab label="Transactions" />
               <Tab label="Reports" />
