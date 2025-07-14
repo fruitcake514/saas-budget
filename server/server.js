@@ -3,6 +3,8 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const pool = require('./db');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
 
 // Routes
 const usersRouter = require('./routes/users');
@@ -29,6 +31,36 @@ app.use('/api/budgets', budgetsRouter);
 app.use('/api/budget-items', budgetItemsRouter);
 app.use('/api/reports', reportsRouter);
 
+// Function to initialize database schema
+async function initializeDatabase() {
+  try {
+    // Check if users table exists
+    const result = await pool.query("SELECT name FROM sqlite_master WHERE type='table' AND name='users'");
+    
+    if (result.rows.length === 0) {
+      console.log('Database tables not found. Initializing database...');
+      
+      // Read and execute schema
+      const schemaPath = path.join(__dirname, 'database.sql');
+      const schema = fs.readFileSync(schemaPath, 'utf8');
+      
+      // Split schema into individual statements
+      const statements = schema.split(';').filter(stmt => stmt.trim().length > 0);
+      
+      for (const statement of statements) {
+        await pool.query(statement);
+      }
+      
+      console.log('Database schema initialized successfully!');
+    } else {
+      console.log('Database already initialized.');
+    }
+  } catch (error) {
+    console.error('Error initializing database:', error.message);
+    throw error;
+  }
+}
+
 // Function to wait for database to be ready
 async function waitForDatabase(maxRetries = 10, delay = 2000) {
   for (let i = 0; i < maxRetries; i++) {
@@ -36,9 +68,7 @@ async function waitForDatabase(maxRetries = 10, delay = 2000) {
       console.log(`Attempting database connection (${i + 1}/${maxRetries})...`);
       
       // Test connection only
-      const client = await pool.connect();
-      await client.query('SELECT 1');
-      client.release();
+      await pool.query('SELECT 1');
       
       console.log('Database connection successful!');
       return true;
@@ -61,7 +91,7 @@ const createDefaultAdmin = async () => {
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
     const adminPassword = process.env.ADMIN_PASSWORD || 'password';
 
-    const user = await pool.query('SELECT * FROM users WHERE username = $1', [
+    const user = await pool.query('SELECT * FROM users WHERE username = ?', [
       adminUsername,
     ]);
 
@@ -70,7 +100,7 @@ const createDefaultAdmin = async () => {
       const hashedPassword = await bcrypt.hash(adminPassword, salt);
 
       await pool.query(
-        'INSERT INTO users (username, password, is_admin) VALUES ($1, $2, $3) RETURNING *',
+        'INSERT INTO users (username, password, is_admin) VALUES (?, ?, ?)',
         [adminUsername, hashedPassword, true]
       );
       console.log('Default admin user created');
@@ -88,6 +118,9 @@ async function startServer() {
   try {
     // Wait for database to be ready
     await waitForDatabase();
+    
+    // Initialize database schema
+    await initializeDatabase();
     
     // Create default admin user
     await createDefaultAdmin();
