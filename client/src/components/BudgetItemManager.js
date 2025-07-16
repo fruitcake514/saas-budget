@@ -60,6 +60,7 @@ const BudgetItemManager = ({ token, selectedBudget, categories }) => {
       setBudgetItems([...budgetItems, res.data]);
       setNewItem({ item_name: '', allocated_amount: '', category_id: '' });
       enqueueSnackbar('Budget item created successfully', { variant: 'success' });
+      window.dispatchEvent(new CustomEvent('budgetItemsChanged'));
     } catch (err) {
       enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
     }
@@ -76,6 +77,7 @@ const BudgetItemManager = ({ token, selectedBudget, categories }) => {
       setBudgetItems(budgetItems.map(item => item.budget_item_id === id ? res.data : item));
       setEditingItem(null);
       enqueueSnackbar('Budget item updated successfully', { variant: 'success' });
+      window.dispatchEvent(new CustomEvent('budgetItemsChanged'));
     } catch (err) {
       enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
     }
@@ -88,6 +90,7 @@ const BudgetItemManager = ({ token, selectedBudget, categories }) => {
       });
       setBudgetItems(budgetItems.filter(item => item.budget_item_id !== id));
       enqueueSnackbar('Budget item deleted successfully', { variant: 'success' });
+      window.dispatchEvent(new CustomEvent('budgetItemsChanged'));
     } catch (err) {
       enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
     }

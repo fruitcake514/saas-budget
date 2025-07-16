@@ -171,9 +171,17 @@ const Dashboard = ({ token, user }) => {
       }
     };
 
+    const handleBudgetItemsChanged = () => {
+      if (selectedBudget) {
+        fetchBudgetItems();
+      }
+    };
+
     window.addEventListener('refreshData', handleRefreshData);
+    window.addEventListener('budgetItemsChanged', handleBudgetItemsChanged);
     return () => {
       window.removeEventListener('refreshData', handleRefreshData);
+      window.removeEventListener('budgetItemsChanged', handleBudgetItemsChanged);
     };
   }, [selectedBudget, user, token]);
 
@@ -282,6 +290,7 @@ const Dashboard = ({ token, user }) => {
       fetchIncome(); // Re-fetch income
       setNewIncome({ amount: '', date: new Date().toISOString().split('T')[0] });
       setIncomeDialog(false);
+      window.dispatchEvent(new CustomEvent('refreshData'));
     } catch (err) {
       enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
     }
@@ -302,8 +311,9 @@ const Dashboard = ({ token, user }) => {
         headers: { 'x-auth-token': token }
       });
       fetchExpenses(); // Re-fetch expenses
-      setNewExpense({ amount: '', category_id: '', description: '', date: new Date().toISOString().split('T')[0] });
+      setNewExpense({ amount: '', category_id: '', description: '', date: new Date().toISOString().split('T')[0], budget_item_id: '' });
       setExpenseDialog(false);
+      window.dispatchEvent(new CustomEvent('refreshData'));
     } catch (err) {
       enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
     }
@@ -371,6 +381,7 @@ const Dashboard = ({ token, user }) => {
           });
           setIncome(income.filter(i => i.income_id !== incomeId));
           enqueueSnackbar('Income deleted successfully', { variant: 'success' });
+          window.dispatchEvent(new CustomEvent('refreshData'));
         } catch (err) {
           enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
         }
@@ -390,6 +401,7 @@ const Dashboard = ({ token, user }) => {
           });
           setExpenses(expenses.filter(e => e.expense_id !== expenseId));
           enqueueSnackbar('Expense deleted successfully', { variant: 'success' });
+          window.dispatchEvent(new CustomEvent('refreshData'));
         } catch (err) {
           enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
         }
@@ -418,6 +430,7 @@ const Dashboard = ({ token, user }) => {
       });
       setIncome(income.map(i => i.income_id === incomeId ? res.data : i));
       setEditingIncome(null);
+      window.dispatchEvent(new CustomEvent('refreshData'));
     } catch (err) {
       enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
     }
@@ -430,6 +443,7 @@ const Dashboard = ({ token, user }) => {
       });
       setExpenses(expenses.map(e => e.expense_id === expenseId ? res.data : e));
       setEditingExpense(null);
+      window.dispatchEvent(new CustomEvent('refreshData'));
     } catch (err) {
       enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
     }
@@ -1028,7 +1042,7 @@ const Dashboard = ({ token, user }) => {
               <InputLabel>Category</InputLabel>
               <Select
                 value={newExpense.category_id}
-                onChange={(e) => setNewExpense(prev => ({...prev, category_id: e.target.value}))}
+                onChange={(e) => setNewExpense(prev => ({...prev, category_id: e.target.value, budget_item_id: ''}))}
                 label="Category"
               >
                 {categories.map((cat) => (
@@ -1189,7 +1203,7 @@ const Dashboard = ({ token, user }) => {
               <InputLabel>Category</InputLabel>
               <Select
                 value={editingExpense?.category_id || ''}
-                onChange={(e) => setEditingExpense(prev => ({...prev, category_id: e.target.value}))}
+                onChange={(e) => setEditingExpense(prev => ({...prev, category_id: e.target.value, budget_item_id: ''}))}
                 label="Category"
               >
                 {categories.map((cat) => (

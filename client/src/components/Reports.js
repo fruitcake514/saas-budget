@@ -33,8 +33,7 @@ import {
   ExpandMore,
   ExpandLess,
   Download as DownloadIcon,
-  Visibility as ViewIcon,
-  Refresh as RefreshIcon
+  Visibility as ViewIcon
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 
@@ -220,39 +219,25 @@ const Reports = ({ token }) => {
             InputLabelProps={{ shrink: true }}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={8}>
-          <Grid container spacing={1}>
-            <Grid item xs={4}>
-              <Button 
-                variant="contained" 
-                onClick={fetchDetailedExpenses} 
-                fullWidth
-                startIcon={<ViewIcon />}
-              >
-                {isMobile ? 'Generate' : 'Generate Report'}
-              </Button>
-            </Grid>
-            <Grid item xs={4}>
-              <Button 
-                variant="outlined" 
-                onClick={handleExportCsv} 
-                fullWidth
-                startIcon={<DownloadIcon />}
-              >
-                {isMobile ? 'Export' : 'Export CSV'}
-              </Button>
-            </Grid>
-            <Grid item xs={4}>
-              <Button 
-                variant="outlined" 
-                onClick={fetchBudgets} 
-                fullWidth
-                startIcon={<RefreshIcon />}
-              >
-                {isMobile ? 'Refresh' : 'Refresh Data'}
-              </Button>
-            </Grid>
-          </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <Button 
+            variant="contained" 
+            onClick={fetchDetailedExpenses} 
+            fullWidth
+            startIcon={<ViewIcon />}
+          >
+            {isMobile ? 'Generate' : 'Generate Report'}
+          </Button>
+        </Grid>
+        <Grid item xs={12} sm={6} md={4}>
+          <Button 
+            variant="outlined" 
+            onClick={handleExportCsv} 
+            fullWidth
+            startIcon={<DownloadIcon />}
+          >
+            {isMobile ? 'Export' : 'Export CSV'}
+          </Button>
         </Grid>
       </Grid>
       
