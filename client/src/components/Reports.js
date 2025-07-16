@@ -33,7 +33,8 @@ import {
   ExpandMore,
   ExpandLess,
   Download as DownloadIcon,
-  Visibility as ViewIcon
+  Visibility as ViewIcon,
+  Refresh as RefreshIcon
 } from '@mui/icons-material';
 import { useSnackbar } from 'notistack';
 
@@ -53,6 +54,20 @@ const Reports = ({ token }) => {
     fetchBudgets();
   }, [token]);
 
+  useEffect(() => {
+    const handleRefreshData = () => {
+      fetchBudgets();
+      if (selectedBudget) {
+        fetchDetailedExpenses();
+      }
+    };
+
+    window.addEventListener('refreshData', handleRefreshData);
+    return () => {
+      window.removeEventListener('refreshData', handleRefreshData);
+    };
+  }, [selectedBudget]);
+
   const fetchBudgets = async () => {
     try {
       const res = await axios.get('/api/budgets', {
@@ -63,20 +78,29 @@ const Reports = ({ token }) => {
         setSelectedBudget(res.data[0].budget_id);
       }
     } catch (err) {
-      enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
+      console.error('Error fetching budgets:', err);
+      const errorMessage = err.response?.data?.msg || err.response?.data || err.message || 'Failed to fetch budgets';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   };
 
 
   const fetchDetailedExpenses = async () => {
-    if (!selectedBudget || !selectedDate) return;
+    if (!selectedBudget || !selectedDate) {
+      enqueueSnackbar('Please select a budget and date', { variant: 'warning' });
+      return;
+    }
+    
     try {
       const res = await axios.get(`/api/reports/detailed-expenses/${selectedBudget}?endDate=${selectedDate}`, {
         headers: { 'x-auth-token': token }
       });
       setDetailedExpenses(res.data);
+      enqueueSnackbar('Report generated successfully', { variant: 'success' });
     } catch (err) {
-      enqueueSnackbar(err.response?.data || err.message, { variant: 'error' });
+      console.error('Error fetching detailed expenses:', err);
+      const errorMessage = err.response?.data?.msg || err.response?.data || err.message || 'Failed to generate report';
+      enqueueSnackbar(errorMessage, { variant: 'error' });
     }
   };
 
@@ -196,25 +220,39 @@ const Reports = ({ token }) => {
             InputLabelProps={{ shrink: true }}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <Button 
-            variant="contained" 
-            onClick={fetchDetailedExpenses} 
-            fullWidth
-            startIcon={<ViewIcon />}
-          >
-            {isMobile ? 'Generate' : 'Generate Detailed Report'}
-          </Button>
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <Button 
-            variant="outlined" 
-            onClick={handleExportCsv} 
-            fullWidth
-            startIcon={<DownloadIcon />}
-          >
-            {isMobile ? 'Export CSV' : 'Export to CSV'}
-          </Button>
+        <Grid item xs={12} sm={6} md={8}>
+          <Grid container spacing={1}>
+            <Grid item xs={4}>
+              <Button 
+                variant="contained" 
+                onClick={fetchDetailedExpenses} 
+                fullWidth
+                startIcon={<ViewIcon />}
+              >
+                {isMobile ? 'Generate' : 'Generate Report'}
+              </Button>
+            </Grid>
+            <Grid item xs={4}>
+              <Button 
+                variant="outlined" 
+                onClick={handleExportCsv} 
+                fullWidth
+                startIcon={<DownloadIcon />}
+              >
+                {isMobile ? 'Export' : 'Export CSV'}
+              </Button>
+            </Grid>
+            <Grid item xs={4}>
+              <Button 
+                variant="outlined" 
+                onClick={fetchBudgets} 
+                fullWidth
+                startIcon={<RefreshIcon />}
+              >
+                {isMobile ? 'Refresh' : 'Refresh Data'}
+              </Button>
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
       

@@ -158,6 +158,26 @@ const Dashboard = ({ token, user }) => {
   }, [token, user, canInstall, isInstalled]);
 
   useEffect(() => {
+    const handleRefreshData = () => {
+      fetchBudgets();
+      fetchCategories();
+      if (user && user.is_admin) {
+        fetchUsers();
+      }
+      if (selectedBudget) {
+        fetchIncome();
+        fetchExpenses();
+        fetchBudgetItems();
+      }
+    };
+
+    window.addEventListener('refreshData', handleRefreshData);
+    return () => {
+      window.removeEventListener('refreshData', handleRefreshData);
+    };
+  }, [selectedBudget, user, token]);
+
+  useEffect(() => {
     if (selectedBudget) {
       fetchIncome();
       fetchExpenses();
