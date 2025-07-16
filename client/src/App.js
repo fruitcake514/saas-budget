@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard';
 import LoadingSpinner from './components/LoadingSpinner';
 import ErrorBoundary from './components/ErrorBoundary';
 import { jwtDecode } from 'jwt-decode';
+import axios from 'axios';
 import {
   Chart as ChartJS,
   ArcElement,
@@ -49,6 +50,69 @@ function App() {
 
     initializeAuth();
   }, []);
+
+  useEffect(() => {
+    const setupAxiosInterceptors = () => {
+      const responseInterceptor = axios.interceptors.response.use(
+        (response) => response,
+        async (error) => {
+          const originalRequest = error.config;
+          
+          if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            
+            try {
+              const storedToken = localStorage.getItem('token');
+              if (storedToken) {
+                const decodedUser = jwtDecode(storedToken);
+                if (decodedUser.exp * 1000 > Date.now()) {
+                  originalRequest.headers['x-auth-token'] = storedToken;
+                  return axios(originalRequest);
+                }
+              }
+            } catch (refreshError) {
+              console.error('Token refresh failed:', refreshError);
+            }
+            
+            localStorage.removeItem('token');
+            setToken(null);
+            setUser(null);
+            return Promise.reject(error);
+          }
+          
+          if (error.response?.status >= 500) {
+            console.error('Server error occurred:', error.response?.data);
+            setTimeout(() => {
+              window.location.reload();
+            }, 1000);
+          }
+          
+          return Promise.reject(error);
+        }
+      );
+
+      return () => {
+        axios.interceptors.response.eject(responseInterceptor);
+      };
+    };
+
+    const cleanup = setupAxiosInterceptors();
+    return cleanup;
+  }, []);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden && token) {
+        const event = new CustomEvent('refreshData');
+        window.dispatchEvent(event);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [token]);
 
   const handleSetToken = (token) => {
     localStorage.setItem('token', token);
